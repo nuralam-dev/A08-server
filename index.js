@@ -32,7 +32,11 @@ app.get("/facilities", async (req, res) => {
   const result = await facilitiesCollection.find().toArray();
   res.send(result);
 });
-
+app.get("/facilities/:id",async (req , res)=>{
+const id = req.params.id
+console.log(id, "id")
+res.send(`your requested facility with id ${id}`)
+})
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
