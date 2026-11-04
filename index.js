@@ -1,12 +1,10 @@
-import express from 'express';
-import { MongoClient } from 'mongodb';
-import 'dotenv/config'
+import "dotenv/config";
+import express from "express";
+import { MongoClient } from "mongodb";
 
 const app = express();
 const port = 4000;
-app.use(express.json())
-
-
+app.use(express.json());
 
 const client = new MongoClient(process.env.MONGODB_URI);
 export async function connectToMongoDB() {
@@ -18,9 +16,17 @@ export async function connectToMongoDB() {
     console.dir(err);
   }
 }
-connectToMongoDB()
-app.get('/', (req, res) => {
-  res.send('Hello World!');
+const connectClient = await connectToMongoDB();
+const db = connectClient.db("A08");
+const facilitiesCollection = db.collection("facilities");
+
+app.get("/facilities",async (req,res)=>{
+const result = await facilitiesCollection.find().toArray()
+res.send(result)
+})
+
+app.get("/", (req, res) => {
+  res.send("Hello World!");
 });
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
