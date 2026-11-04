@@ -21,6 +21,7 @@ export async function connectToMongoDB() {
 const connectClient = await connectToMongoDB();
 const db = connectClient.db("A08");
 const facilitiesCollection = db.collection("facilities");
+const facilitiesBookingCollection = db.collection("facilitiesBooking");
 
 app.post("/facilities", async (req, res) => {
   const facilitiesData = req.body;
@@ -28,15 +29,25 @@ app.post("/facilities", async (req, res) => {
   res.send(result);
 });
 
+app.post("/facilities/booking", async (req, res) => {
+  const bookingData = req.body;
+  const result = await facilitiesBookingCollection.insertOne(bookingData);
+  res.send(result);
+});
+app.get("/facilities/booking", async (req, res) => {
+  const result = await facilitiesBookingCollection.find().toArray();
+  res.send(result);
+});
+
 app.get("/facilities", async (req, res) => {
   const result = await facilitiesCollection.find().toArray();
   res.send(result);
 });
-app.get("/facilities/:id",async (req , res)=>{
-const id = req.params.id
-console.log(id, "id")
-res.send(`your requested facility with id ${id}`)
-})
+app.get("/facilities/:id", async (req, res) => {
+  const id = req.params.id;
+  console.log(id, "id");
+  res.send(`your requested facility with id ${id}`);
+});
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
