@@ -43,10 +43,43 @@ app.get("/facilities", async (req, res) => {
   const result = await facilitiesCollection.find().toArray();
   res.send(result);
 });
+app.get("/facilities/my", async (req, res) => {
+  const { email } = req.query;
+
+  if (typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+    return res.status(400).send({ message: "A valid email query parameter is required." });
+  }
+
+  try {
+    const result = await facilitiesCollection.find({ email: email.trim() }).toArray();
+    res.send(result);
+  } catch (err) {
+    res.status(500).send({ message: "Failed to fetch your facilities." });
+  }
+});
 app.get("/facilities/:id", async (req, res) => {
   const id = req.params.id;
   console.log(id, "id");
   res.send(`your requested facility with id ${id}`);
+});
+// PATCH API to update a facility by ID
+app.patch("/facilities/:id", async (req, res) => {
+  const id = req.params.id;
+  const updatedData = req.body;
+  const result = await facilitiesCollection.updateOne(
+    { _id: new ObjectId(id) },
+    { $set: updatedData },
+  );
+  res.send(result);
+});
+
+// DELETE API to remove a facility by ID
+app.delete("/facilities/:id", async (req, res) => {
+  const id = req.params.id;
+  const result = await facilitiesCollection.deleteOne({
+    _id: new ObjectId(id),
+  });
+  res.send(result);
 });
 app.get("/", (req, res) => {
   res.send("Hello World!");
