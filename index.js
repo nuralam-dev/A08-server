@@ -2,25 +2,10 @@ import cors from "cors";
 import "dotenv/config";
 import express from "express";
 import { MongoClient, ObjectId } from "mongodb";
+import { port, clientOrigin, authBaseUrl, authMode, jwtAudience } from "./config.js";
 
 const app = express();
-const port = Number(process.env.PORT) || 4000;
 app.use(express.json());
-const isProduction = process.env.NODE_ENV === "production";
-if (isProduction && (!process.env.CLIENT_ORIGIN || !process.env.AUTH_BASE_URL)) {
-  throw new Error("Set CLIENT_ORIGIN and AUTH_BASE_URL to your HTTPS frontend origin.");
-}
-const clientOrigin = new URL(process.env.CLIENT_ORIGIN?.trim() || "http://localhost:3000").origin;
-const authBaseUrl = new URL(process.env.AUTH_BASE_URL?.trim() || clientOrigin).origin;
-if (isProduction && (!clientOrigin.startsWith("https://") || !authBaseUrl.startsWith("https://"))) {
-  throw new Error("Production authentication requires HTTPS origins.");
-}
-const authMode = process.env.API_AUTH_MODE || "session";
-if (!["session", "jwt"].includes(authMode)) throw new Error("API_AUTH_MODE must be session or jwt.");
-const jwtAudience = process.env.JWT_AUDIENCE?.trim() || "http://localhost:4000";
-if (isProduction && authMode === "jwt" && !process.env.JWT_AUDIENCE) {
-  throw new Error("Set JWT_AUDIENCE to the same value on both servers.");
-}
 let verifyApiJWT;
 if (authMode === "jwt") {
   const { createRemoteJWKSet, jwtVerify } = await import("jose");
@@ -296,6 +281,10 @@ app.delete("/facilities/:id", requireAuth, requireFacilityOwner, async (req, res
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
-});
+export default app;
+
+if (!process.env.VERCEL) {
+  app.listen(port, () => {
+    console.log(`Example app listening on port ${port}`);
+  });
+}
