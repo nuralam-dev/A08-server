@@ -1,61 +1,50 @@
-# StudioSpace Vercel configuration
+# Fresh StudioSpace backend deployment preparation
 
-The frontend currently runs only at `http://localhost:3000`. Local backend URL settings belong in the ignored `.env`. The real frontend production domain is pending; no production domain has been configured. Keep the production HTTPS checks enabled. Backend production startup intentionally fails until its actual HTTPS `CLIENT_URL` is supplied. `AUTH_BASE_URL` may use the same value or be omitted to inherit `CLIENT_URL`. Do not copy local URL values into Vercel production settings.
+No deployment, Vercel project creation/deletion, Git commit or push is part of this preparation. Choose the real frontend and backend production domains before configuring either app. Do not reuse old preview/deployment IDs as configuration.
 
-Deploy `a-08-client` as the Next.js project and `A-08-server` as the Express project. Do not deploy the older `studio-space-client` / `studio-space-server` folders for this app. Express exports its app from `index.js`; the local listener only runs outside Vercel. The existing `vercel.json` maps incoming routes to `index.js`; no additional dependency is needed.
+## Runtime
 
-## Frontend Vercel environment
+Vercel's current Express support detects the root `index.js` default app export from the Express dependency. The old `builds`/catch-all `routes` vercel.json has been removed; no replacement is needed. The ignored old CLI link was archived locally at `/tmp/studiospace-audit/vercel-project.previous.json`; a future deployment will need an explicit fresh project link. No remote project was changed. Select Express automatic detection and the A-08-server root for the future project. Use Node.js 24.x (the locally tested version is 24.14.1). This is JavaScript with no compilation/build step. Leave custom build/output overrides unset. `npm start` is for local runtime; Vercel invokes the exported app without the local listener.
 
-Set these in the frontend project, replacing the domain placeholders with your actual domains:
+The MongoClient and connection promise are reused per warm instance, with a bounded pool and failed-connection retry. There is no top-level network connection during app import. Local startup verifies MongoDB before listening; `/health` checks database reachability in either runtime. API data always uses database `A08` unless explicitly overridden. Booking transactions require a MongoDB replica set/Atlas cluster; the inspected existing cluster supports this. Grant normal read/write permissions for `facilities`, `facilitiesBooking`, and the new `bookingLocks` collection in the selected API database. Lock documents are coordination metadata, not changes to legacy facilities/bookings. They are retained during normal operation.
 
-```dotenv
-NEXT_PUBLIC_API_URL=https://YOUR-BACKEND.vercel.app
-NEXT_PUBLIC_AUTH_URL=https://YOUR-FRONTEND.vercel.app
-BACKEND_URL=https://YOUR-BACKEND.vercel.app
-BETTER_AUTH_URL=https://YOUR-FRONTEND.vercel.app
-BETTER_AUTH_SECRET=YOUR_EXISTING_PRIVATE_RANDOM_SECRET
-MONGODB_URI=YOUR_PRIVATE_AUTH_DATABASE_CONNECTION_STRING
-API_AUTH_MODE=jwt
-JWT_AUDIENCE=studiospace-api
-# Optional Google provider (configure both to enable):
-GOOGLE_CLIENT_ID=YOUR_GOOGLE_CLIENT_ID
-GOOGLE_CLIENT_SECRET=YOUR_PRIVATE_GOOGLE_CLIENT_SECRET
-```
+## Exact backend production environment checklist
 
-Keep the existing BetterAuth secret stable. BetterAuth stores signing keys in MongoDB; do not add JWT private keys or secrets to public variables. Use the existing auth database selected by your frontend MongoDB URI. `NEXT_PUBLIC_` variables are public and require a rebuild when changed.
+| Variable | Production value |
+| --- | --- |
+| `MONGODB_URI` | Existing private MongoDB connection string; never expose publicly |
+| `MONGODB_DB_NAME` | `A08`, or omit to use `A08` |
+| `CLIENT_URL` | Actual canonical HTTPS frontend origin, without a path/query/fragment |
+| `AUTH_BASE_URL` | Actual canonical HTTPS BetterAuth frontend origin; omit only when identical to CLIENT_URL |
+| `API_AUTH_MODE` | `jwt` (also the backend default) |
+| `JWT_AUDIENCE` | Explicit identifier matching frontend JWT_AUDIENCE exactly; `studiospace-api` is suitable if configured on both |
+| `JWT_ISSUER` | Frontend BetterAuth issuer origin; omit to inherit AUTH_BASE_URL |
+| `JWT_JWKS_URL` | Full trusted HTTPS JWKS endpoint; omit to derive AUTH_BASE_URL + `/api/auth/jwks` |
+| `NODE_ENV` | `production` (normally provided by Vercel) |
+| `PORT` | Omit on Vercel; local default is 4000 |
 
-`BACKEND_URL` is the private server-side override; `NEXT_PUBLIC_API_URL` is the fallback. Set both to the same backend origin. `BETTER_AUTH_URL` and `NEXT_PUBLIC_AUTH_URL` must identify the same frontend origin. No trailing path or `/api/auth` suffix belongs in these origin values.
+Remove obsolete `CLIENT_ORIGIN` when setting CLIENT_URL. The legacy name remains a fallback, but a conflict fails startup rather than silently selecting the wrong origin. Remove unused old URL overrides from each environment scope, including branch overrides. HTTPS production validation remains enforced. Do not set fake domains or localhost to bypass startup errors. Validation checks origin shape and common loopback names; it does not establish domain ownership or DNS reachability.
 
-Browser facility and booking requests intentionally keep using `/api/backend`. Next.js reads the configured backend origin and forwards the active HTTP-only session cookie plus a fresh Bearer token in JWT mode. Featured Facilities and Facility Details use the existing server-side URL utility. BetterAuth client calls stay on the frontend origin. Direct browser requests to a separate backend domain would lose the existing first-party cookie flow.
+No API self/base URL is needed on the backend. No BetterAuth secret, Google secret, or JWT private key belongs on this backend: authentication is still owned by the existing frontend. JWT verification uses its trusted public JWKS plus its live session endpoint. Both endpoints must be reachable from Vercel without interactive deployment-protection redirects. Configure Production and Preview separately; previews require their own explicit trusted frontend/auth pairing, not wildcard CORS.
 
-## Backend Vercel environment
+## Frontend alignment required
 
-```dotenv
-CLIENT_URL=https://YOUR-FRONTEND.vercel.app
-AUTH_BASE_URL=https://YOUR-FRONTEND.vercel.app
-MONGODB_URI=YOUR_PRIVATE_FACILITIES_DATABASE_CONNECTION_STRING
-API_AUTH_MODE=jwt
-JWT_AUDIENCE=studiospace-api
-```
+In `a-08-client`, configure `API_AUTH_MODE=jwt` and the same JWT audience. Set `BETTER_AUTH_URL` to the actual HTTPS frontend origin; if NEXT_PUBLIC_AUTH_URL is set, it must match. Set BACKEND_URL and NEXT_PUBLIC_API_URL to the actual fresh HTTPS backend origin. Preserve BETTER_AUTH_SECRET, auth database credentials, and signing keys. The existing same-origin `/api/backend` proxy forwards both the active cookie and a server-issued JWT. A direct browser request to another domain does not replace that session-bound flow.
 
-`AUTH_BASE_URL` defaults to `CLIENT_URL`. `CLIENT_ORIGIN` remains supported for existing installations when `CLIENT_URL` is absent. CORS permits the configured frontend origin and credentials. Express derives the JWT issuer, `/api/auth/jwks`, and live session verification URL from `AUTH_BASE_URL`. The JWT audience must match the frontend exactly. Express keeps using database `A08`.
+There are old deployment URL comments in the frontend `.env.example`; they are not backend defaults and should be replaced by the frontend agent. New route forwarding needs are listed in [API_CONTRACT.md](API_CONTRACT.md). OAuth callback URLs, when used, need the actual frontend domain; keep their configuration in the frontend project.
 
-Vercel supplies runtime configuration; `PORT=4000` is only needed for local development. Neither BetterAuth nor Google secrets belong on the backend. Existing installations default to session mode; these production examples explicitly enable the existing JWT plugin on both apps.
+## Local operation and verification
 
-## Local development
+Preserve existing `.env` secrets. Merge missing keys from `.env.example`; do not overwrite `.env`. The existing local frontend origin is http://localhost:3000 and API port is 4000. Enable frontend JWT mode and align audience before making private requests. Do not copy local origins into Production.
 
-Keep backend credentials in `.env` and frontend credentials in `.env.local` (Next.js also continues loading the existing `.env`). Use each app's `.env.example` to discover variable names; copy only missing values rather than replacing existing secrets. The newly created frontend `.env.local` contains URL overrides only; existing secrets remain in `.env`. If using custom development ports, update the corresponding environment values. Start Express with `node index.js` and Next.js with `npm run dev`.
+- `npm ci`: install the lockfile dependencies when needed; no new packages were introduced here.
+- `npm start` / `npm run dev`: local API, with MongoDB startup check.
+- `npm run check`: syntax validation of runtime modules (no build step).
+- `npm test`: offline Node tests in `tests/` for input validation, legacy ownership and environment rules.
+- `npm run test:integration`: actual HTTP API and adjacent frontend BetterAuth/JWKS integration; requires network/database access and the existing frontend dependencies. Optional FRONTEND_DIR points to a different frontend folder.
 
-Intentional local references remain in development-only defaults, example environment files, README instructions, and Google callback documentation. `https://studiospace.local` in AuthForm is an inert base for validating relative redirect destinations; it is never requested. There are no WebSocket URLs. Production rejects local or HTTP auth/API origins. Production JWT mode requires an explicit audience.
+Integration verification creates uniquely named disposable users and facilities/bookings. It cleans up those users, sessions, accounts, bookings, facilities and explicitly tracked lock documents only. Original facility/booking documents are hashed before and after to check preservation. It does not drop databases/collections or rewrite existing records. BetterAuth-managed signing keys are retained. Avoid concurrent writes to existing records during this preservation check.
 
-## Before deployment
+See [VERIFICATION.md](VERIFICATION.md) for actual results and [API_CONTRACT.md](API_CONTRACT.md) for implemented endpoints. Local tests cannot prove Vercel domain routing, deployment protection, or actual production environment values. After an explicitly authorized future deployment, check `/health`, public reads, allowed/disallowed origins, BetterAuth JWT issuance, ownership rejection, booking conflicts and logout revocation against the real domains.
 
-- Replace placeholders and set variables in both Vercel projects before building. Production builds intentionally reject local auth origins.
-- Enable MongoDB access from the deployed apps and use the existing correct databases. Both apps require their own `MONGODB_URI` setting.
-- For Google sign-in, register `https://YOUR-FRONTEND.vercel.app/api/auth/callback/google` in your OAuth client's authorized redirect URIs. Keep the localhost callback for local development.
-- Use matching frontend domains across auth, CORS, and OAuth. Preview domains require matching configuration and OAuth registration; arbitrary origins are not trusted.
-- Ensure backend-to-frontend session/JWKS requests are permitted by any Vercel deployment protection settings.
-- After deployment, verify public listings and details, sign-in/out, facility ownership, booking creation/list/deletion, rejection of invalid Bearer tokens, and Secure/HttpOnly/SameSite=Lax cookies. Actual production domains and OAuth credentials have not been tested here.
-- `GET /facilities/:id` still returns its existing placeholder. Facility Details continues resolving the record through `GET /facilities`.
-
-References: [Express on Vercel](https://vercel.com/docs/frameworks/backend/express), [BetterAuth JWT plugin](https://github.com/better-auth/better-auth/blob/main/docs/content/docs/plugins/jwt.mdx). Next.js environment behavior was checked against the installed Next.js documentation.
+References: [Vercel Express support](https://vercel.com/docs/frameworks/backend/express), [BetterAuth JWT plugin](https://better-auth.com/docs/plugins/jwt), [MongoDB transaction concurrency](https://www.mongodb.com/docs/manual/core/transactions-production-consideration/).
