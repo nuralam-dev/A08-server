@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+  <rect width="960" height="540" fill="#f1f5f9"/>
+  <g fill="none" stroke="#94a3b8" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="420" y="180" width="120" height="90" rx="12"/>
+    <circle cx="453" cy="207" r="9"/>
+    <path d="m426 258 34-30 25 22 20-17 29 25"/>
+  </g>
+  <text x="480" y="320" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#64748b">Studio image unavailable</text>
+</svg>

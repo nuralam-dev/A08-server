@@ -30,3 +30,12 @@ test("legacy ownership needs verified email; explicit userId always takes preced
   assert.equal(ownsBooking({ userId: "other", email: user.email }, user), false);
   assert.equal(bookingOwner({ ...user, emailVerified: false }).$or.length, 1);
 });
+
+test("booking rejects past starts and the current minute in the facility timezone", () => {
+  const now = new Date("2030-02-28T03:00:30Z"); // 09:00 in Dhaka
+  for (const change of [{ date: "2000-01-01" }, { startTime: "08:59" }, { startTime: "09:00" }]) {
+    assert.throws(() => bookingFields({ ...booking, ...change }, now), { status: 400 });
+  }
+  assert.equal(bookingFields({ ...booking, startTime: "09:01" }, now).startTime, "09:01");
+  assert.throws(() => bookingFields({ ...booking, date: "2030-02-28", startTime: "23:00", endTime: "23:30" }, new Date("2030-02-28T18:01:00Z")), { status: 400 });
+});

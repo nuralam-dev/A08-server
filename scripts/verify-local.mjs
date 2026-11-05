@@ -187,9 +187,17 @@ try {
   assert.equal((await call(`/facilities/${id}`, a, "PUT", { name: "partial" })).status, 400);
   assert.equal((await call(`/facilities/${id}`, a, "PATCH", {})).status, 400);
   assert.equal((await call("/facilities/bad", a, "PATCH", { name: "bad" })).status, 400);
+  const bCreated = await call("/facilities", b, "POST", studio);
+  assert.equal(bCreated.status, 201);
+  const bId = bCreated.data.insertedId;
+  lockIds.push(bId);
+  assert.equal((await call("/facilities/mine", b)).data[0]._id, bId);
+  assert.equal((await call(`/facilities/${bId}`, b, "PATCH", { name: "User B studio" })).status, 200);
+  assert.equal((await call(`/facilities/${bId}`, a, "DELETE")).status, 403);
+  assert.equal((await call(`/facilities/${bId}`, b, "DELETE")).data.deletedCount, 1);
   pass("facility create/mine/my/PATCH/PUT; trusted owner identity and cross-account 403; string/array images");
   const booking = { facilityId: id, date: "2035-05-10", startTime: "09:00", endTime: "10:00", guests: 3 };
-  for (const change of [{ guests: 6 }, { date: "2035-02-30" }, { startTime: "11:00" }, { endTime: "09:00" }, { guests: 0 }]) {
+  for (const change of [{ guests: 6 }, { date: "2000-01-01" }, { date: "2035-02-30" }, { startTime: "11:00" }, { endTime: "09:00" }, { guests: 0 }, { guests: 1.5 }, { guests: "2" }, { startTime: "24:00" }, { date: undefined }, { endTime: undefined }, { guests: undefined }]) {
     assert.equal((await call("/facilities/booking", a, "POST", { ...booking, ...change })).status, 400);
   }
   const missingFacility = new ObjectId().toHexString();

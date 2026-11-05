@@ -1,0 +1,252 @@
+[
+  {
+    "test": "Proxy data equals direct backend",
+    "status": "PASS",
+    "actual": "13 records match"
+  },
+  {
+    "test": "Page /",
+    "status": "FAIL",
+    "actual": "Expected values to be strictly equal:\n\n3 !== 1\n"
+  },
+  {
+    "test": "Responsive / 390",
+    "status": "PASS",
+    "actual": "No horizontal overflow"
+  },
+  {
+    "test": "Responsive / 768",
+    "status": "PASS",
+    "actual": "No horizontal overflow"
+  },
+  {
+    "test": "Responsive / 1440",
+    "status": "PASS",
+    "actual": "No horizontal overflow"
+  },
+  {
+    "test": "Images /",
+    "status": "FAIL",
+    "actual": "locator.evaluateAll: Execution context was destroyed, most likely because of a navigation"
+  },
+  {
+    "test": "Page /facilities",
+    "status": "FAIL",
+    "actual": "page.goto: Navigation to \"http://localhost:3000/facilities\" is interrupted by another navigation to \"http://localhost:3000/\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/facilities\", waiting until \"domcontentloaded\"\u001b[22m\n"
+  },
+  {
+    "test": "Responsive /facilities 390",
+    "status": "PASS",
+    "actual": "No horizontal overflow"
+  },
+  {
+    "test": "Responsive /facilities 768",
+    "status": "PASS",
+    "actual": "No horizontal overflow"
+  },
+  {
+    "test": "Responsive /facilities 1440",
+    "status": "PASS",
+    "actual": "No horizontal overflow"
+  },
+  {
+    "test": "Images /facilities",
+    "status": "FAIL",
+    "actual": "locator.evaluateAll: Execution context was destroyed, most likely because of a navigation"
+  },
+  {
+    "test": "Page /login",
+    "status": "FAIL",
+    "actual": "page.goto: Navigation to \"http://localhost:3000/login\" is interrupted by another navigation to \"http://localhost:3000/facilities\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/login\", waiting until \"domcontentloaded\"\u001b[22m\n"
+  },
+  {
+    "test": "Responsive /login 390",
+    "status": "PASS",
+    "actual": "No horizontal overflow"
+  },
+  {
+    "test": "Responsive /login 768",
+    "status": "PASS",
+    "actual": "No horizontal overflow"
+  },
+  {
+    "test": "Responsive /login 1440",
+    "status": "PASS",
+    "actual": "No horizontal overflow"
+  },
+  {
+    "test": "Images /login",
+    "status": "FAIL",
+    "actual": "locator.evaluateAll: Execution context was destroyed, most likely because of a navigation"
+  },
+  {
+    "test": "Page /register",
+    "status": "FAIL",
+    "actual": "page.goto: Navigation to \"http://localhost:3000/register\" is interrupted by another navigation to \"http://localhost:3000/login\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/register\", waiting until \"domcontentloaded\"\u001b[22m\n"
+  },
+  {
+    "test": "Responsive /register 390",
+    "status": "FAIL",
+    "actual": "page.evaluate: TypeError: Cannot read properties of null (reading 'scrollWidth')\n    at eval (eval at evaluate (:370:30), <anonymous>:1:30)\n    at UtilityScript.evaluate (<anonymous>:372:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)"
+  },
+  {
+    "test": "Responsive /register 768",
+    "status": "FAIL",
+    "actual": "page.evaluate: TypeError: Cannot read properties of null (reading 'scrollWidth')\n    at eval (eval at evaluate (:370:30), <anonymous>:1:30)\n    at UtilityScript.evaluate (<anonymous>:372:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)"
+  },
+  {
+    "test": "Responsive /register 1440",
+    "status": "FAIL",
+    "actual": "page.evaluate: TypeError: Cannot read properties of null (reading 'scrollWidth')\n    at eval (eval at evaluate (:370:30), <anonymous>:1:30)\n    at UtilityScript.evaluate (<anonymous>:372:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)"
+  },
+  {
+    "test": "Images /register",
+    "status": "PASS",
+    "actual": "2 images loaded"
+  },
+  {
+    "test": "Page /privacy",
+    "status": "FAIL",
+    "actual": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/privacy\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/privacy\", waiting until \"domcontentloaded\"\u001b[22m\n"
+  },
+  {
+    "test": "Responsive /privacy 390",
+    "status": "PASS",
+    "actual": "No horizontal overflow"
+  },
+  {
+    "test": "Responsive /privacy 768",
+    "status": "PASS",
+    "actual": "No horizontal overflow"
+  },
+  {
+    "test": "Responsive /privacy 1440",
+    "status": "PASS",
+    "actual": "No horizontal overflow"
+  },
+  {
+    "test": "Images /privacy",
+    "status": "PASS",
+    "actual": "2 images loaded"
+  },
+  {
+    "test": "Page /terms",
+    "status": "PASS",
+    "actual": "Terms of Service"
+  },
+  {
+    "test": "Responsive /terms 390",
+    "status": "PASS",
+    "actual": "No horizontal overflow"
+  },
+  {
+    "test": "Responsive /terms 768",
+    "status": "PASS",
+    "actual": "No horizontal overflow"
+  },
+  {
+    "test": "Responsive /terms 1440",
+    "status": "PASS",
+    "actual": "No horizontal overflow"
+  },
+  {
+    "test": "Images /terms",
+    "status": "PASS",
+    "actual": "0 images loaded"
+  },
+  {
+    "test": "Page /facilities/6aeaf86918a05b539ad41ec8",
+    "status": "PASS",
+    "actual": "Unable to load this studio"
+  },
+  {
+    "test": "Responsive /facilities/6aeaf86918a05b539ad41ec8 390",
+    "status": "PASS",
+    "actual": "No horizontal overflow"
+  },
+  {
+    "test": "Responsive /facilities/6aeaf86918a05b539ad41ec8 768",
+    "status": "PASS",
+    "actual": "No horizontal overflow"
+  },
+  {
+    "test": "Responsive /facilities/6aeaf86918a05b539ad41ec8 1440",
+    "status": "PASS",
+    "actual": "No horizontal overflow"
+  },
+  {
+    "test": "Images /facilities/6aeaf86918a05b539ad41ec8",
+    "status": "PASS",
+    "actual": "0 images loaded"
+  },
+  {
+    "test": "Protected redirect /dashboard",
+    "status": "PASS",
+    "actual": "307 to login"
+  },
+  {
+    "test": "Protected redirect /dashboard/add-facility",
+    "status": "PASS",
+    "actual": "307 to login"
+  },
+  {
+    "test": "Protected redirect /dashboard/manage-facilities",
+    "status": "PASS",
+    "actual": "307 to login"
+  },
+  {
+    "test": "Protected redirect /dashboard/my-facility",
+    "status": "PASS",
+    "actual": "307 to login"
+  },
+  {
+    "test": "Protected redirect /dashboard/my-booking",
+    "status": "PASS",
+    "actual": "307 to login"
+  },
+  {
+    "test": "Protected redirect /dashboard/edit-facility/6aeaf86918a05b539ad41ec8",
+    "status": "PASS",
+    "actual": "307 to login"
+  },
+  {
+    "test": "Protected redirect /my-facility",
+    "status": "PASS",
+    "actual": "307 to login"
+  },
+  {
+    "test": "Not found /does-not-exist",
+    "status": "PASS",
+    "actual": "Not-found UI rendered"
+  },
+  {
+    "test": "Not found /facilities/000000000000000000000000",
+    "status": "FAIL",
+    "actual": "locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByText(/not found|could not be found/i).first() to be visible\u001b[22m\n"
+  },
+  {
+    "test": "Search and category filters",
+    "status": "FAIL",
+    "actual": "locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByText('Showing 13 of 13 facilities') to be visible\u001b[22m\n"
+  },
+  {
+    "test": "Facilities loading UI",
+    "status": "PASS",
+    "actual": "Expected UI visible (intercepted response)"
+  },
+  {
+    "test": "Facilities empty UI",
+    "status": "PASS",
+    "actual": "Expected UI visible (intercepted response)"
+  },
+  {
+    "test": "Facilities error UI",
+    "status": "PASS",
+    "actual": "Expected UI visible (intercepted response)"
+  },
+  {
+    "test": "Browser runtime errors",
+    "status": "PASS",
+    "actual": "No pageerror events"
+  }
+]

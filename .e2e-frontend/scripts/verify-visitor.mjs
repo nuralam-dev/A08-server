@@ -1,0 +1,25 @@
+import assert from 'node:assert/strict';
+import {createRequire} from 'node:module';
+import {mkdir,writeFile} from 'node:fs/promises';
+const require=createRequire(import.meta.url);
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE || '/tmp/a08-delete-booking-browser/node_modules/playwright');
+const browser=await chromium.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true});
+const base='http://localhost:3000';const results=[];const runtimeErrors=[];
+const context=await browser.newContext();const page=await context.newPage();page.setDefaultTimeout(30000);
+page.on('pageerror',e=>runtimeErrors.push(e.message));
+async function check(name,fn){try{const actual=await fn();results.push({test:name,status:'PASS',actual});console.log('PASS '+name)}catch(e){results.push({test:name,status:'FAIL',actual:e.message});console.log('FAIL '+name+': '+e.message.slice(0,250))}}
+try{
+ await check('Proxy data equals direct backend',async()=>{const direct=await(await context.request.get('http://localhost:4000/facilities')).json();const proxied=await(await context.request.get(base+'/api/backend/facilities')).json();assert.deepEqual(proxied,direct);return `${direct.length} records match`;});
+ const facilities=await(await context.request.get(base+'/api/backend/facilities')).json();
+ for(const path of ['/','/facilities','/login','/register','/privacy','/terms',`/facilities/${facilities[0]._id}`]){
+ await check('Page '+path,async()=>{const res=await page.goto(base+path,{waitUntil:'domcontentloaded'});assert.equal(res.status(),200);await page.locator('h1').first().waitFor();assert.equal(await page.locator('h1').count(),1);return await page.locator('h1').first().innerText();});
+ for(const width of [390,768,1440])await check(`Responsive ${path} ${width}`,async()=>{await page.setViewportSize({width,height:900});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));return 'No horizontal overflow';});
+ await check('Images '+path,async()=>{await page.locator('img').evaluateAll(imgs=>imgs.forEach(i=>i.loading='eager'));await page.waitForTimeout(2500);const images=await page.locator('img').evaluateAll(imgs=>imgs.map(i=>({src:i.getAttribute('src'),ok:i.complete&&i.naturalWidth>0})));assert.ok(images.every(i=>i.ok),JSON.stringify(images.filter(i=>!i.ok)));return `${images.length} images loaded`;});
+ }
+ for(const path of ['/dashboard','/dashboard/add-facility','/dashboard/manage-facilities','/dashboard/my-facility','/dashboard/my-booking','/dashboard/edit-facility/'+facilities[0]._id,'/my-facility'])await check('Protected redirect '+path,async()=>{const r=await context.request.get(base+path,{maxRedirects:0});assert.ok([307,308].includes(r.status()));assert.ok(r.headers().location.includes('/login?next='));return `${r.status()} to login`;});
+ for(const path of ['/does-not-exist','/facilities/000000000000000000000000'])await check('Not found '+path,async()=>{await page.goto(base+path,{waitUntil:'domcontentloaded'});await page.getByText(/not found|could not be found/i).first().waitFor();return 'Not-found UI rendered';});
+ await check('Search and category filters',async()=>{await page.goto(base+'/facilities',{waitUntil:'domcontentloaded'});await page.getByText(`Showing ${facilities.length} of ${facilities.length} facilities`).waitFor();await page.getByLabel('Search facilities').fill('UNMATCHED-AUDIT-SEARCH');await page.getByRole('heading',{name:'No facilities found.'}).waitFor();await page.getByLabel('Search facilities').fill('');await page.getByRole('button',{name:facilities[0].category,exact:true}).click();await page.waitForURL('**/facilities?category=**');const expected=facilities.filter(f=>f.category===facilities[0].category).length;await page.getByText(`Showing ${expected} of ${facilities.length} facilities`).waitFor();return 'Search empty state and category count match';});
+ for(const scenario of ['loading','empty','error'])await check('Facilities '+scenario+' UI',async()=>{await page.route('**/api/backend/facilities',async route=>{if(scenario==='loading')await new Promise(r=>setTimeout(r,4000));await route.fulfill({status:scenario==='error'?503:200,contentType:'application/json',body:'[]'});});await page.goto(base+'/facilities',{waitUntil:'domcontentloaded'});if(scenario==='loading')await page.locator('.animate-pulse').first().waitFor();else if(scenario==='empty')await page.getByRole('heading',{name:'No facilities found.'}).waitFor();else await page.getByRole('alert').waitFor();await page.unrouteAll({behavior:'wait'});return 'Expected UI visible (intercepted response)';});
+ await check('Browser runtime errors',async()=>{assert.deepEqual(runtimeErrors,[]);return 'No pageerror events';});
+}finally{await mkdir('test-results',{recursive:true});await writeFile('test-results/visitor.json',JSON.stringify(results,null,2));await browser.close();}
+console.log(JSON.stringify({pass:results.filter(r=>r.status==='PASS').length,fail:results.filter(r=>r.status==='FAIL').length}));

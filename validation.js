@@ -35,7 +35,13 @@ export function facilityFields(body, partial = false) {
   if (!Object.keys(data).length) fail(400, "Provide at least one editable facility field.");
   return data;
 }
-export function bookingFields(body) {
+// Facility wall-clock times use one explicit zone, independent of Vercel's TZ.
+const bookingClock = new Intl.DateTimeFormat("sv-SE", {
+  timeZone: process.env.BOOKING_TIME_ZONE || "Asia/Dhaka",
+  year: "numeric", month: "2-digit", day: "2-digit",
+  hour: "2-digit", minute: "2-digit", hourCycle: "h23",
+});
+export function bookingFields(body, now = new Date()) {
   bodyObject(body);
   const { facilityId, date, startTime, endTime, guests } = body;
   const id = objectId(facilityId);
@@ -48,6 +54,9 @@ export function bookingFields(body) {
     fail(400, "Use HH:mm times with endTime after startTime on the same date.");
   }
   if (!Number.isSafeInteger(guests) || guests < 1) fail(400, "Guests must be a positive integer.");
+  const parts = Object.fromEntries(bookingClock.formatToParts(now).map(({ type, value }) => [type, value]));
+  const currentMinute = `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
+  if (`${date}T${startTime}` <= currentMinute) fail(400, "Booking start must be in the future.");
   return { facilityId: id.toHexString(), date, startTime, endTime, guests };
 }
 // Missing status means confirmed for the original booking schema.

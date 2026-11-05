@@ -79,7 +79,7 @@ POST body:
 }
 ```
 
-`facilityId` must identify an existing facility. `date` is a real calendar date in YYYY-MM-DD format. Times are zero-padded 24-hour HH:mm, on the same date, with end strictly after start. `guests` must be a positive safe integer at most the facility capacity. Times are wall-clock times for the facility; no timezone conversion or past-date cutoff is currently applied. Overnight bookings are not supported.
+`facilityId` must identify an existing facility. `date` is a real calendar date in YYYY-MM-DD format. Times are zero-padded 24-hour HH:mm, on the same date, with end strictly after start. `guests` must be a positive safe integer at most the facility capacity. Times are facility wall-clock times in `BOOKING_TIME_ZONE` (default `Asia/Dhaka`), independent of the server timezone. The start must be after the current minute in that zone; past starts return 400. Overnight bookings are not supported.
 
 Server sets `userId` from verified `sub`, takes `name`/`email` from the live BetterAuth user, and sets `status: "confirmed"`. Request `userId`, `name`, `email`, `ownerId`, or status cannot grant authority or override these values.
 
