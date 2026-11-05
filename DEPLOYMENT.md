@@ -1,5 +1,7 @@
 # StudioSpace Vercel configuration
 
+The frontend currently runs only at `http://localhost:3000`. Local backend URL settings belong in the ignored `.env`. The real frontend production domain is pending; no production domain has been configured. Keep the production HTTPS checks enabled. Backend production startup intentionally fails until its actual HTTPS `CLIENT_URL` is supplied. `AUTH_BASE_URL` may use the same value or be omitted to inherit `CLIENT_URL`. Do not copy local URL values into Vercel production settings.
+
 Deploy `a-08-client` as the Next.js project and `A-08-server` as the Express project. Do not deploy the older `studio-space-client` / `studio-space-server` folders for this app. Express exports its app from `index.js`; the local listener only runs outside Vercel. The existing `vercel.json` maps incoming routes to `index.js`; no additional dependency is needed.
 
 ## Frontend Vercel environment
