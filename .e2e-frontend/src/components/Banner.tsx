@@ -79,7 +79,9 @@ export default function Banner() {
         className="mx-auto max-w-7xl overflow-hidden rounded-3xl bg-[#141c19] text-white sm:rounded-[2rem]"
       >
         <CarouselContent className="ml-0">
-          {slides.map((slide, index) => (
+          {slides.map((slide, index) => {
+            const Heading = current === index ? "h1" : "h2";
+            return (
             <CarouselItem key={slide.id} className="pl-0" aria-label={`${index + 1} of ${slides.length}`} inert={current !== index}>
               <div className="relative isolate flex min-h-[570px] flex-col justify-between px-6 pb-24 pt-7 sm:px-10 sm:pt-8 lg:min-h-[530px] lg:px-14 lg:pt-10">
                 <div className="absolute inset-0 -z-20 lg:left-[36%]">
@@ -100,10 +102,10 @@ export default function Banner() {
                     <span className="size-1.5 rounded-full bg-lime-300" aria-hidden="true" />
                     <span className="text-[10px] font-medium tracking-[0.14em] text-white/85 uppercase sm:text-xs">{slide.label}</span>
                   </div>
-                  <h1 className="text-4xl leading-[1.08] font-semibold tracking-tight sm:text-5xl lg:text-6xl">
+                  <Heading className="text-4xl leading-[1.08] font-semibold tracking-tight sm:text-5xl lg:text-6xl">
                     {slide.title}
                     <span className="mt-1 block text-lime-300">{slide.accent}</span>
-                  </h1>
+                  </Heading>
                   <p className="mt-4 max-w-md text-base leading-relaxed text-white/65 sm:text-lg">{slide.description}</p>
 
                   <div className="mt-6 flex flex-col gap-3 min-[400px]:flex-row">
@@ -138,7 +140,8 @@ export default function Banner() {
                 </div>
               </div>
             </CarouselItem>
-          ))}
+            );
+          })}
         </CarouselContent>
 
         <div className="absolute inset-x-6 bottom-6 flex items-center justify-between border-t border-white/15 pt-5 sm:inset-x-10 lg:inset-x-14">
